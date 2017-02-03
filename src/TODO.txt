@@ -1,0 +1,3 @@
+Integrate position of bounding box with ROS node for autopilot
+Hand tracker for gestures? Doable with OpenCV, would run in separate node
+
