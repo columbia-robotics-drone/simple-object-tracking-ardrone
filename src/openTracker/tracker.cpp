@@ -4,6 +4,8 @@
 #include <opencv2/highgui.hpp>
 #include <iostream>
 #include <cstring>
+#include <unistd.h>
+
 using namespace std;
 using namespace cv;
 int main( int argc, char** argv ){
@@ -24,29 +26,27 @@ int main( int argc, char** argv ){
     }
     // declares all required variables
     Mat frame;
-    // create a tracker object
+    // create a tracker object array
     Ptr<Tracker> *trackers = new Ptr<Tracker>[argc];
     Rect2d roi;
     Rect2d *rois = new Rect2d[argc];
-    for (int i = 1; i < argc; i++) {    
-        trackers[i-1] = Tracker::create( argv[i] );
-    }
     // set input video
     VideoCapture cap(0);
     // get bounding box
+    sleep(1);
     cap >> frame;
     roi=selectROI("tracker",frame);
     //quit if ROI was not selected
     if(roi.width==0 || roi.height==0)
         return 0;
-    // initialize the trackers
-    for (int i = 0; i < argc - 1; i++) {
-        rois[i] = roi;    
-        trackers[i]->init(frame,rois[i]);
+    for (int i = 1; i < argc; i++) {    
+        rois[i-1] = roi;
+        trackers[i-1] = Tracker::create( argv[i] );
+        trackers[i-1]->init(frame,rois[i-1]);
     }
     // perform the tracking process
     printf("Start the tracking process, press ESC to quit.\n");
-    for ( ;; ){
+    for ( ;; ) {
         // get frame from the video
         cap >> frame;
         // stop the program if no more images
@@ -56,7 +56,7 @@ int main( int argc, char** argv ){
             // update the tracking result
             trackers[i]->update(frame,rois[i]);
             // draw the tracked object
-            rectangle( frame, rois[i], Scalar( 255, 0, 0 ), 2, 1 );
+            rectangle( frame, rois[i], Scalar( (255-50*i)%255, (50*i)%255, (150-50*i)%255), 2, 1 );
         }
         // show image with the tracked object
         imshow("tracker",frame);
